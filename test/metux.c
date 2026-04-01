@@ -13,6 +13,7 @@ void *work(void *arg)
 int main()
 {
     pthread_t t1, t2, t3;
+    pthread_mutex_t f1;
 
     pthread_create(&t1, NULL, work, NULL);
     pthread_create(&t2, NULL, work, NULL);

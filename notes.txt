@@ -1,0 +1,147 @@
+🧠 🧩 الصورة الكبيرة (Big Flow)
+MAIN
+ ↓
+parse → init → create threads
+ ↓
+[ THREADS START ]
+ ↓
+routine (loop)
+ ↓
+take_dongles → compile → release → debug → refactor
+ ↓
+monitor (كيشوف burnout)
+ ↓
+STOP
+
+
+🧭 1️⃣ MAIN FLOW
+main()
+ ├── parser_parameter()
+ ├── init_table()
+ ├── init_coders()
+ ├── create_threads()
+ ├── start_monitor()
+ └── join_threads()
+
+
+⚙️ 2️⃣ INIT PHASE
+init_table()
+ ├── malloc coders
+ ├── malloc dongles
+ ├── pthread_mutex_init(dongles)
+ ├── pthread_mutex_init(print_lock)
+ └── pthread_mutex_init(stop_lock)
+
+
+🧵 3️⃣ CREATE THREADS
+create_threads()
+ ├── pthread_create(coder1)
+ ├── pthread_create(coder2)
+ ├── ...
+ └── pthread_create(monitor)
+
+
+🔁 4️⃣ ROUTINE (القلب)
+
+كل coder كيدخل هنا:
+
+routine(coder)
+ └── while (!stop)
+      ├── take_dongles()
+      ├── compile()
+      ├── release_dongles()
+      ├── debug()
+      └── refactor()
+
+
+🔒 5️⃣ take_dongles
+take_dongles()
+ ├── scheduler يدخل (FIFO / EDF)
+ ├── queue/heap يتحدّث
+ ├── wait(cond) إلا ماشي دورك
+ ├── pthread_mutex_lock(left)
+ ├── pthread_mutex_lock(right)
+ └── print("has taken a dongle")
+
+
+⚡ 6️⃣ compile
+compile()
+ ├── update last_compile
+ ├── print("is compiling")
+ ├── usleep(time_to_compile)
+ └── compile_count++
+
+
+
+
+🔓 7️⃣ release_dongles
+release_dongles()
+ ├── pthread_mutex_unlock(left)
+ ├── pthread_mutex_unlock(right)
+ ├── apply cooldown
+ └── pthread_cond_broadcast()
+
+➡️ هنا كنفيقو لي فـ queue
+
+🧠 8️⃣ debug / refactor
+debug()
+ ├── print("is debugging")
+ └── usleep(time_to_debug)
+
+refactor()
+ ├── print("is refactoring")
+ └── usleep(time_to_refactor)
+
+
+
+👁️ 9️⃣ MONITOR THREAD
+monitor()
+ └── loop
+      ├── for each coder
+      │    ├── now - last_compile
+      │    ├── if > burnout
+      │    │    ├── print("burned out")
+      │    │    └── stop = 1
+      └── check must_compile
+
+
+
+🛑 🔟 STOP
+if stop == 1
+ ↓
+threads تخرج من loop
+ ↓
+pthread_join()
+ ↓
+destroy mutex
+ ↓
+end program
+
+
+🔄 🔥 FLOW كامل (Schema كبير)
+                ┌──────────────┐
+                │    main      │
+                └──────┬───────┘
+                       ↓
+             ┌──────────────────┐
+             │ init + parsing   │
+             └──────┬───────────┘
+                    ↓
+             ┌──────────────────┐
+             │ create threads   │
+             └──────┬───────────┘
+                    ↓
+        ┌───────────────────────────┐
+        │       ROUTINE LOOP        │
+        │  take → compile → release│
+        │      → debug → refactor  │
+        └──────┬───────────────────┘
+               ↓
+        ┌────────────────────┐
+        │    MONITOR THREAD  │
+        │ check burnout/stop │
+        └──────┬─────────────┘
+               ↓
+        ┌────────────────────┐
+        │      STOP          │
+        └────────────────────┘

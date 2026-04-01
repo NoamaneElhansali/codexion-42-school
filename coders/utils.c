@@ -1,8 +1,8 @@
 #include "codexion.h"
 
-int	ft_atoi(const char *nptr)
+long	ft_atoi(const char *nptr)
 {
-	int (numbre), (positive);
+	long (numbre), (positive);
 	numbre = 0;
 	positive = 1;
 	while ((*nptr >= '\t' && *nptr <= '\r') || *nptr == ' ')
@@ -18,6 +18,8 @@ int	ft_atoi(const char *nptr)
         if (!(*nptr >= '0' && *nptr <= '9'))
             return -1;
 		numbre = (numbre * 10) + (*nptr - 48);
+		if (numbre > INT_MAX)
+			return (-1);
 		nptr++;
 	}
 	return (numbre * positive);
@@ -35,7 +37,14 @@ size_t	ft_strlen(const char *s)
 	return (s - c);
 }
 
-int	ft_strcmp(const char *s1, const char *s2)
+char to_lower(char a)
+{
+	if (a >= 65 && a <= 90)
+		return a + 32;
+	return a;
+}
+
+int	ft_strcmp_adv(const char *s1, const char *s2)
 {
 	size_t	i;
 
@@ -44,7 +53,7 @@ int	ft_strcmp(const char *s1, const char *s2)
 		return (0);
 	while (s1[i] && s2[i])
 	{
-		if (s1[i] != s2[i])
+		if (to_lower(s1[i]) != to_lower(s2[i]))
 			return (0);
 		i++;
 	}
