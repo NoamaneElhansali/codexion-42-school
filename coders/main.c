@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
         return 1;
     param = parser(argv, argc);
     table = init_parameter(param, argv[8]);
+    start_monitoring(table);
     free(param);
     free(table->coders);
     free(table->dongles);

@@ -59,3 +59,15 @@ int	ft_strcmp_adv(const char *s1, const char *s2)
 	}
 	return (1);
 }
+
+void smart_sleep(long time, t_table *t)
+{
+    long start = gettimenow();
+
+    while (!get_stop(t))
+    {
+        if (gettimenow() - start >= time)
+            break;
+        usleep(100);
+    }
+}
