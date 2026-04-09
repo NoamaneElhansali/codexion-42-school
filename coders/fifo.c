@@ -48,9 +48,8 @@ int is_in_first_fifo(t_queue *q, int id, int n)
 
     while (i < q->r && count < n)
     {
-        while (q->data[i] == id)
+        if (q->data[i] == id)
             return (1);
-        
         count++;
         i++;
     }

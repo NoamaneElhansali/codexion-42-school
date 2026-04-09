@@ -70,7 +70,7 @@ int take_dongles_edf(t_coder *coder)
     t_table *table = coder->table;
     pthread_mutex_lock(&table->queue_lock);
     add_to_heap(&table->heap, coder);
-    while (!is_in_first_edf(&table->heap, coder->id, table->nb_coders) && !get_stop(table))
+    while (!is_in_first_edf(&table->heap, coder->id, table->nb_coders / 2) && !get_stop(table))
         pthread_cond_wait(&table->cond, &table->queue_lock);
     
     pthread_mutex_unlock(&table->queue_lock);

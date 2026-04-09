@@ -111,5 +111,6 @@ int take_dongles_edf(t_coder *coder);
 void release_dongles_edf(t_coder *coder);
 int is_in_first_fifo(t_queue *q, int id, int n);
 int is_in_first_edf(t_heap *h, int id, int n);
+void smart_sleep(long time, t_table *t);
 
 # endif

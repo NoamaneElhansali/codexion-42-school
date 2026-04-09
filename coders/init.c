@@ -10,14 +10,18 @@ void compile(t_coder *coder)
         if (!take_dongles_edf(coder))
             return;
     }
-    if (get_stop(coder->table))
-        return;
     pthread_mutex_lock(&coder->table->print_lock);
     now = gettimenow();
+    if (get_stop(coder->table))
+    {
+        pthread_mutex_unlock(&coder->table->print_lock);
+        return;
+    }
     coder->last_compile = now;
     printf("%ld %d is compiling\n", now - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
-    usleep(coder->table->time_to_compile * 1000);
+    // usleep(coder->table->time_to_compile * 1000);
+    smart_sleep(coder->table->time_to_compile, coder->table);
     coder->compile_count++;
     if (coder->table->scheduler == FIFO)
         release_dongles_fifo(coder);
@@ -29,20 +33,28 @@ void debugging(t_coder *coder)
 {
     pthread_mutex_lock(&coder->table->print_lock);
     if (get_stop(coder->table))
+    {
+        pthread_mutex_unlock(&coder->table->print_lock);
         return;
+    }
     printf("%ld %d is debugging\n", gettimenow() - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
-    usleep(coder->table->time_to_debug * 1000);
+    // usleep(coder->table->time_to_debug * 1000);
+    smart_sleep(coder->table->time_to_debug, coder->table);
 }
 
 void refactoring(t_coder *coder)
 {
     pthread_mutex_lock(&coder->table->print_lock);
     if (get_stop(coder->table))
+    {
+        pthread_mutex_unlock(&coder->table->print_lock);
         return;
+    }
     printf("%ld %d is refactoring\n", gettimenow() - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
-    usleep(coder->table->time_to_refactor * 1000);
+    // usleep(coder->table->time_to_refactor * 1000);
+    smart_sleep(coder->table->time_to_refactor, coder->table);
 }
 
 long gettimenow()

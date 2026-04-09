@@ -7,8 +7,10 @@ OBJ = $(SRC:.c=.o)
 all: $(NAME)
 
 $(NAME) : $(OBJ)
-	$(CC) $(CFLAGS) -fsanitize=address -g3 $(OBJ) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
+debug:
+	$(CC) $(CFLAGS) -fsanitize=address -g3 $(SRC) -o $(NAME)
 clean:
 	rm -f $(OBJ)
 

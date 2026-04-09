@@ -63,11 +63,11 @@ int	ft_strcmp_adv(const char *s1, const char *s2)
 void smart_sleep(long time, t_table *t)
 {
     long start = gettimenow();
-
+	long time_to_sleep = time / 10;
     while (!get_stop(t))
     {
         if (gettimenow() - start >= time)
             break;
-        usleep(100);
+        usleep(time_to_sleep);
     }
 }
