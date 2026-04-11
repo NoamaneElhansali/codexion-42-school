@@ -41,7 +41,7 @@ int check_must_complie(t_table *table)
     int j = 0;
     while (j < table->nb_coders)
     {
-        if (table->coders[j].compile_count < table->must_compile)
+        if (get_compile_count(&table->coders[j]) < table->must_compile)
             all_done = 0;
         j++;
     }
@@ -60,7 +60,7 @@ void *monitor(void *arg)
         while (i < table->nb_coders)
         {
             now = gettimenow();
-            if (table->coders[i].last_compile + table->time_to_burnout < now)
+            if (get_last_compile(&table->coders[i]) + table->time_to_burnout < now)
             {
                 set_stop(table);
                 pthread_mutex_lock(&table->queue_lock);
@@ -78,8 +78,7 @@ void *monitor(void *arg)
             }
             i++;
         }
-        
+        usleep(1000);
     }
     return NULL;
-    
 }

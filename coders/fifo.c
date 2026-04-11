@@ -24,11 +24,17 @@ int take_dongles_fifo(t_coder *coder)
     pthread_mutex_lock(&t->queue_lock);
     push(&t->queue, coder->id);
     while (!is_in_first_fifo(&t->queue, coder->id, t->nb_coders / 2) && !get_stop(t))
+    {
+        // pthread_mutex_lock(&t->print_lock);
+        // printf("hee\n");
+        // pthread_mutex_unlock(&t->print_lock);    
         pthread_cond_wait(&t->cond, &t->queue_lock);
+    }
     pthread_mutex_unlock(&t->queue_lock);
     if (get_stop(t))
         return 0;
-    take_dongles(coder);
+    if (!take_dongles(coder))
+        return 0;
     return 1;
 }
 
@@ -37,6 +43,11 @@ void release_dongles_fifo(t_coder *coder)
     give_dongles(coder);
     pthread_mutex_lock(&coder->table->queue_lock);
     pop(&coder->table->queue);
+    if (coder->table->queue.f >= coder->table->queue.r)
+    {
+        coder->table->queue.f = 0;
+        coder->table->queue.r = 0;
+    }
     pthread_cond_broadcast(&coder->table->cond);
     pthread_mutex_unlock(&coder->table->queue_lock);
 }

@@ -1,28 +1,35 @@
 #include "codexion.h"
 
+int is_complet_compile(t_coder *coder)
+{
+    return get_compile_count(coder) == coder->table->must_compile;
+}
+
 void compile(t_coder *coder)
 {
     long now;
     if (coder->table->scheduler == FIFO) {
         if (!take_dongles_fifo(coder))
+        {
+            
             return;
+        }
     } else {
         if (!take_dongles_edf(coder))
             return;
     }
+    if (get_stop(coder->table))
+        return;
     pthread_mutex_lock(&coder->table->print_lock);
     now = gettimenow();
-    if (get_stop(coder->table))
-    {
-        pthread_mutex_unlock(&coder->table->print_lock);
-        return;
-    }
-    coder->last_compile = now;
+    // coder->last_compile = now;
+    set_last_compile(coder, now);
+    smart_sleep(coder->table->dongle_cooldown, coder->table);
     printf("%ld %d is compiling\n", now - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
-    // usleep(coder->table->time_to_compile * 1000);
     smart_sleep(coder->table->time_to_compile, coder->table);
-    coder->compile_count++;
+    // coder->compile_count++; 
+    increment_compile_count(coder);
     if (coder->table->scheduler == FIFO)
         release_dongles_fifo(coder);
     else
@@ -31,12 +38,9 @@ void compile(t_coder *coder)
 
 void debugging(t_coder *coder)
 {
-    pthread_mutex_lock(&coder->table->print_lock);
     if (get_stop(coder->table))
-    {
-        pthread_mutex_unlock(&coder->table->print_lock);
         return;
-    }
+    pthread_mutex_lock(&coder->table->print_lock);
     printf("%ld %d is debugging\n", gettimenow() - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
     // usleep(coder->table->time_to_debug * 1000);
@@ -45,12 +49,9 @@ void debugging(t_coder *coder)
 
 void refactoring(t_coder *coder)
 {
-    pthread_mutex_lock(&coder->table->print_lock);
     if (get_stop(coder->table))
-    {
-        pthread_mutex_unlock(&coder->table->print_lock);
         return;
-    }
+    pthread_mutex_lock(&coder->table->print_lock);
     printf("%ld %d is refactoring\n", gettimenow() - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
     // usleep(coder->table->time_to_refactor * 1000);
@@ -64,21 +65,35 @@ long gettimenow()
     return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-void take_dongles(t_coder *coder)
+int take_dongles(t_coder *coder)
 {
     if (get_stop(coder->table))
-        return;
-    pthread_mutex_lock(coder->left);
-    pthread_mutex_lock(coder->right);
+        return 0;
+    pthread_mutex_t *first;
+    pthread_mutex_t *second;
+    if (coder->left < coder->right)
+    {
+        first = coder->left;
+        second = coder->right;
+    }
+    else
+    {
+        first = coder->right;
+        second = coder->left;
+    }
+    pthread_mutex_lock(first);
+    pthread_mutex_lock(second);
+    pthread_mutex_lock(&coder->table->print_lock);
     if (get_stop(coder->table))
     {
-        pthread_mutex_unlock(coder->left);
-        pthread_mutex_unlock(coder->right);
-        return;
+        pthread_mutex_unlock(first);
+        pthread_mutex_unlock(second);
+        // pthread_mutex_unlock(&coder->table->print_lock);
+        return 0;
     }
-    pthread_mutex_lock(&coder->table->print_lock);
     printf("%ld %d has taken a dongle\n", gettimenow() - coder->table->start_time, coder->id);
     pthread_mutex_unlock(&coder->table->print_lock);
+    return 1;
 }
 
 void give_dongles(t_coder *coder)
@@ -96,17 +111,17 @@ int coder_is_burned(t_coder *coder)
 void *coder_routine(void *arg)
 {
     t_coder *coder = (t_coder *)arg;
-    while (!get_stop(coder->table) && !coder_is_burned(coder))
+    while (!get_stop(coder->table) && !is_complet_compile(coder))
     {
-        if (get_stop(coder->table))
+        if (get_stop(coder->table) || is_complet_compile(coder))
             break;
         compile(coder);
-        if (get_stop(coder->table))
+        if (get_stop(coder->table) || is_complet_compile(coder))
             break;
         debugging(coder);
-        if (get_stop(coder->table))
+        if (get_stop(coder->table) || is_complet_compile(coder))
             break;
-        refactoring(coder);
+        refactoring(coder); 
     }
     
     return NULL;
@@ -125,15 +140,12 @@ void init_coder(t_coder *coder,t_table *table, int id)
 
 void init_coders(t_table *table)
 {
-    t_coder *coders;
     int counter = 0;
-    coders = malloc(sizeof(t_coder) * table->nb_coders);
     while (counter < table->nb_coders)
     {
-        init_coder(&coders[counter], table, counter);
+        init_coder(&table->coders[counter], table, counter);
         counter++;
     }
-    table->coders = coders;
 }
 
 
@@ -161,6 +173,18 @@ void init_mutex(t_table *table)
     pthread_cond_init(&table->cond, NULL);
 }
 
+
+void init_mutex_coder(t_table *table)
+{
+    int i = 0;
+    while (i < table->nb_coders)
+    {
+        pthread_mutex_init(&table->coders[i].compile_count_lock, NULL);
+        pthread_mutex_init(&table->coders[i].last_compile_lock, NULL);
+        i++;
+    }
+}
+
 t_table *init_parameter(int *paramter, char *scheduler)
 {
     t_table *table;
@@ -179,9 +203,11 @@ t_table *init_parameter(int *paramter, char *scheduler)
     table->stop = 0;
     table->heap.size = 0;
     table->dongles = malloc(sizeof(pthread_mutex_t) * table->nb_coders);
+    table->coders = malloc(sizeof(t_coder) * table->nb_coders);
     table->start_time = gettimenow();
     init_queue(&table->queue);
     init_mutex(table);
+    init_mutex_coder(table);
     init_coders(table);
     return table;
 }

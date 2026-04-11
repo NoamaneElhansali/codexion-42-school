@@ -14,6 +14,8 @@ typedef struct s_coder
 
     long last_compile;
     int compile_count;
+    pthread_mutex_t last_compile_lock;
+    pthread_mutex_t compile_count_lock;
 
     pthread_mutex_t *left;
     pthread_mutex_t *right;
@@ -94,7 +96,7 @@ void start_monitoring(t_table *table);
 void *monitor(void *arg);
 void debugging(t_coder *coder);
 void refactoring(t_coder *coder);
-void take_dongles(t_coder *coder);
+int take_dongles(t_coder *coder);
 void give_dongles(t_coder *coder);
 void join_coders(t_table *table);
 void push(t_queue *q, int id);
@@ -112,5 +114,10 @@ void release_dongles_edf(t_coder *coder);
 int is_in_first_fifo(t_queue *q, int id, int n);
 int is_in_first_edf(t_heap *h, int id, int n);
 void smart_sleep(long time, t_table *t);
+void init_mutex_coder(t_table *table);
+long get_last_compile(t_coder *coder);
+void set_last_compile(t_coder *coder, long time);
+int get_compile_count(t_coder *coder);
+void increment_compile_count(t_coder *coder);
 
 # endif

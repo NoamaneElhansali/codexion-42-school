@@ -76,7 +76,8 @@ int take_dongles_edf(t_coder *coder)
     pthread_mutex_unlock(&table->queue_lock);
     if (get_stop(table))
         return 0;
-    take_dongles(coder);
+    if (!take_dongles(coder))
+        return 0;
     return 1;
 }
 

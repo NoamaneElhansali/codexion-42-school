@@ -10,13 +10,14 @@ $(NAME) : $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
 debug:
-	$(CC) $(CFLAGS) -fsanitize=address -g3 $(SRC) -o $(NAME)
+	$(CC) $(CFLAGS)  -fsanitize=thread -g $(SRC) -o $(NAME)
 clean:
 	rm -f $(OBJ)
 
 fclean: clean
 	rm -f $(NAME)
 
+re-d: fclean debug
 re: fclean all
 
 .PHONY : clean
