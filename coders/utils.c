@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/11 12:26:10 by nelhansa          #+#    #+#             */
+/*   Updated: 2026/04/11 17:58:05 by nelhansa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 long	ft_atoi(const char *nptr)
 {
-	long (numbre), (positive);
+	long(numbre), (positive);
 	numbre = 0;
 	positive = 1;
 	while ((*nptr >= '\t' && *nptr <= '\r') || *nptr == ' ')
@@ -15,8 +27,8 @@ long	ft_atoi(const char *nptr)
 	}
 	while (*nptr)
 	{
-        if (!(*nptr >= '0' && *nptr <= '9'))
-            return -1;
+		if (!(*nptr >= '0' && *nptr <= '9'))
+			return (-1);
 		numbre = (numbre * 10) + (*nptr - 48);
 		if (numbre > INT_MAX)
 			return (-1);
@@ -37,11 +49,11 @@ size_t	ft_strlen(const char *s)
 	return (s - c);
 }
 
-char to_lower(char a)
+char	to_lower(char a)
 {
 	if (a >= 65 && a <= 90)
-		return a + 32;
-	return a;
+		return (a + 32);
+	return (a);
 }
 
 int	ft_strcmp_adv(const char *s1, const char *s2)
@@ -60,14 +72,15 @@ int	ft_strcmp_adv(const char *s1, const char *s2)
 	return (1);
 }
 
-void smart_sleep(long time, t_table *t)
+void	smart_sleep(long time, t_table *t)
 {
-    long start = gettimenow();
+	long	start;
 
-    while (!get_stop(t))
-    {
-        if (gettimenow() - start >= time)
-            break;
-        usleep(100);
-    }
+	start = gettimenow();
+	while (!get_stop(t))
+	{
+		if (gettimenow() - start >= time)
+			break ;
+		usleep(100);
+	}
 }
