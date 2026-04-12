@@ -1,84 +1,86 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/11 12:26:01 by nelhansa          #+#    #+#             */
+/*   Updated: 2026/04/12 02:26:49 by nelhansa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
-int get_stop(t_table *table)
-{
-    int value;
 
-    pthread_mutex_lock(&table->stop_lock);
-    value = table->stop;
-    pthread_mutex_unlock(&table->stop_lock);
-    return (value);
+void	start_monitoring(t_table *table)
+{
+	pthread_create(&table->thread_monitor, NULL, monitor, table);
+	pthread_join(table->thread_monitor, NULL);
+	join_coders(table);
 }
 
-void set_stop(t_table *table)
+void	join_coders(t_table *table)
 {
-    pthread_mutex_lock(&table->stop_lock);
-    table->stop = 1;
-    pthread_mutex_unlock(&table->stop_lock);
+	int	counter;
+
+	counter = 0;
+	while (counter < table->nb_coders)
+	{
+		pthread_join(table->coders[counter].thread, NULL);
+		counter++;
+	}
 }
 
-void start_monitoring(t_table *table)
+int	check_must_complie(t_table *table)
 {
-    pthread_create(&table->thread_monitor, NULL, monitor, table);
-    pthread_join(table->thread_monitor, NULL);
-    join_coders(table);
+	int	all_done;
+
+	pthread_mutex_lock(&table->complite_sim_lock);
+	all_done = (table->complite_sim == table->nb_coders);
+	pthread_mutex_unlock(&table->complite_sim_lock);
+
+	return (all_done);
 }
 
-void join_coders(t_table *table)
+int	check_similation(t_table *table, long now, int i)
 {
-    int counter = 0;
-    while (counter < table->nb_coders)
-    {
-        pthread_join(table->coders[counter].thread, NULL);
-        counter++;
-    }
+	if (get_last_compile(&table->coders[i]) + table->time_to_burnout < now)
+	{
+		set_stop(table);
+		broadcast_coder(table);
+		pthread_mutex_lock(&table->print_lock);
+		printf("\033[31m%ld %d burned out\n", now - table->start_time,
+			table->coders[i].id);
+		pthread_mutex_unlock(&table->print_lock);
+		return (1);
+	}
+	if (check_must_complie(table))
+	{
+		set_stop(table);
+		broadcast_coder(table);
+		return (1);
+	}
+	return (0);
 }
 
-
-int check_must_complie(t_table *table)
+void	*monitor(void *arg)
 {
-    int all_done = 1;
+	t_table	*table;
+	int		i;
+	long	now;
 
-    int j = 0;
-    while (j < table->nb_coders)
-    {
-        if (get_compile_count(&table->coders[j]) < table->must_compile)
-            all_done = 0;
-        j++;
-    }
-    return all_done;
-}
-
-void *monitor(void *arg)
-{
-    t_table *table = (t_table *)arg;
-    int i;
-    long now;
-
-    while (!get_stop(table))
-    {
-        i = 0;
-        while (i < table->nb_coders)
-        {
-            now = gettimenow();
-            if (get_last_compile(&table->coders[i]) + table->time_to_burnout < now)
-            {
-                set_stop(table);
-                pthread_mutex_lock(&table->queue_lock);
-                pthread_cond_broadcast(&table->cond);
-                pthread_mutex_unlock(&table->queue_lock);
-                pthread_mutex_lock(&table->print_lock);
-                printf("%ld %d burned out\n", now - table->start_time, table->coders[i].id);
-                pthread_mutex_unlock(&table->print_lock);
-                return (NULL);
-            }
-            if (check_must_complie(table))
-            {
-                set_stop(table);
-                return NULL;
-            }
-            i++;
-        }
-        usleep(1000);
-    }
-    return NULL;
+	table = (t_table *)arg;
+	while (!get_stop(table))
+	{
+		i = 0;
+		while (i < table->nb_coders)
+		{
+			now = gettimenow();
+			if (check_similation(table, now, i))
+				return (NULL);
+			i++;
+		}
+		usleep(1000);
+	}
+	return (NULL);
 }
