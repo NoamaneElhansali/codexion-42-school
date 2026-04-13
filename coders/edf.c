@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:48 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 16:25:44 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 21:41:00 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,23 +47,19 @@ void	remove_min(t_heap *heap)
 {
 	t_coder	*tmp;
 
-	int(i), (j), (z), (smallest);
+	int (i), (j), (smallest);
 	i = 0;
 	if (heap->size == 0)
-		return;
+		return ;
 	heap->data[0] = heap->data[heap->size - 1];
 	heap->size--;
 	while (1)
 	{
 		j = i * 2 + 1;
-		z = i * 2 + 2;
 		smallest = i;
 		if (j < heap->size
 			&& get_deadline(heap->data[j]) < get_deadline(heap->data[smallest]))
 			smallest = j;
-		if (z < heap->size
-			&& get_deadline(heap->data[z]) < get_deadline(heap->data[smallest]))
-			smallest = z;
 		if (smallest == i)
 			break ;
 		tmp = heap->data[i];
@@ -73,18 +69,12 @@ void	remove_min(t_heap *heap)
 	}
 }
 
-t_coder	*get_min_heap(t_heap *heap)
-{
-	if (heap->size == 0)
-		return (NULL);
-	return (heap->data[0]);
-}
-
-void wait_heap(t_dongle *d, t_coder *coder)
+void	wait_heap(t_dongle *d, t_coder *coder)
 {
 	pthread_mutex_lock(&d->queue_lock);
 	add_to_heap(&d->heap, coder);
-	while (get_min_heap(&d->heap) && (get_min_heap(&d->heap)->id != coder->id) && !get_stop(coder->table))
+	while (get_min_heap(&d->heap) && (get_min_heap(&d->heap)->id != coder->id)
+		&& !get_stop(coder->table))
 		pthread_cond_wait(&d->cond, &d->queue_lock);
 	pthread_mutex_unlock(&d->queue_lock);
 }
@@ -93,7 +83,7 @@ int	take_dongles_edf(t_coder *coder)
 {
 	t_table	*table;
 
-	table = coder->table; 
+	table = coder->table;
 	if (get_stop(table))
 		return (0);
 	if (!take_dongles(coder))

@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:13 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 02:18:31 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 21:44:41 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ void	increment_compile_count(t_coder *coder)
 	if (coder->compile_count == coder->table->must_compile)
 	{
 		pthread_mutex_lock(&coder->table->complite_sim_lock);
-		// printf("// => %d\n", coder->compile_count);
 		coder->table->complite_sim++;
 		pthread_mutex_unlock(&coder->table->complite_sim_lock);
 	}

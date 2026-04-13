@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:38 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 18:59:36 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 20:36:39 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,79 +28,26 @@ int	take_dongles(t_coder *coder)
 	}
 	if (!lock_dongles(first, coder))
 		return (0);
-    if (first == second || !lock_dongles(second, coder))
-    {
-        pthread_mutex_unlock(&first->mutex); 
-        return (0);
-    }
-	return (1);
-}
-
-void set_last_use(t_dongle *d, long now)
-{
-	pthread_mutex_lock(&d->last_used_lock);
-	d->last_used = now;
-	pthread_mutex_unlock(&d->last_used_lock);
-}
-
-void remove_in_queue(t_dongle *d)
-{
-	pthread_mutex_lock(&d->queue_lock);
-	pop(&d->queue);
-	pthread_cond_broadcast(&d->cond);
-	pthread_mutex_unlock(&d->queue_lock);
-}
-
-void remove_in_heap(t_dongle *d)
-{
-	pthread_mutex_lock(&d->queue_lock);
-	remove_min(&d->heap);
-	pthread_cond_broadcast(&d->cond);
-	pthread_mutex_unlock(&d->queue_lock);
-}
-
-void	give_dongles(t_coder *coder)
-{
-	long	now;
-
-	now = gettimenow();
-	
-	if (coder->table->scheduler == FIFO)
+	if (first == second || !lock_dongles(second, coder))
 	{
-		remove_in_queue(coder->left);
-		remove_in_queue(coder->right);
-	}else
-	{
-		remove_in_heap(coder->left);
-		remove_in_heap(coder->right);
+		pthread_mutex_unlock(&first->mutex);
+		return (0);
 	}
-	pthread_mutex_unlock(&coder->left->mutex);
-	pthread_mutex_unlock(&coder->right->mutex);
-	set_last_use(coder->left, now);
-	set_last_use(coder->right, now);
-}
-
-int	coder_is_burned(t_coder *coder)
-{
-	long	now;
-
-	now = gettimenow();
-	return (now - coder->last_compile > coder->table->time_to_burnout);
+	return (1);
 }
 
 void	broadcast_coder(t_table *table)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < table->nb_coders)
-	{	
+	{
 		pthread_mutex_lock(&table->dongles[i].queue_lock);
 		pthread_cond_broadcast(&table->dongles[i].cond);
 		pthread_mutex_unlock(&table->dongles[i].queue_lock);
 		i++;
 	}
-	
 }
 
 void	wait_cooldown(t_dongle *d, t_table *t)
@@ -125,9 +72,9 @@ void	wait_cooldown(t_dongle *d, t_table *t)
 int	lock_dongles(t_dongle *d, t_coder *coder)
 {
 	if (coder->table->scheduler == FIFO)
-		wait_queue(d,coder);
+		wait_queue(d, coder);
 	else
-		wait_heap(d,coder);
+		wait_heap(d, coder);
 	wait_cooldown(d, coder->table);
 	pthread_mutex_lock(&d->mutex);
 	if (get_stop(coder->table))
@@ -136,7 +83,6 @@ int	lock_dongles(t_dongle *d, t_coder *coder)
 		return (0);
 	}
 	pthread_mutex_lock(&coder->table->print_lock);
-	// printf("%ld\n", coder->table->time_to_burnout);
 	printf("\033[32m%ld %d has taken a dongle\033[0m\n", gettimenow()
 		- coder->table->start_time, coder->id);
 	pthread_mutex_unlock(&coder->table->print_lock);

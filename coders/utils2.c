@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:49:27 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 07:03:50 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 21:45:09 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,6 @@ void	release_dongles_edf(t_coder *coder)
 
 	table = coder->table;
 	give_dongles(coder);
-}
-
-int	is_in_first_edf(t_heap *h, int id, int n)
-{
-	int	i;
-
-	i = 0;
-	if (h->size == 0)
-		return (0);
-	while (i < h->size && i < n)
-	{
-		if (h->data[i]->id == id)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-void	init_queue(t_queue *q)
-{
-	q->f = 0;
-	q->r = 0;
 }
 
 int	get_stop(t_table *table)
@@ -57,4 +35,24 @@ void	set_stop(t_table *table)
 	pthread_mutex_lock(&table->stop_lock);
 	table->stop = 1;
 	pthread_mutex_unlock(&table->stop_lock);
+}
+
+t_coder	*get_min_heap(t_heap *heap)
+{
+	if (heap->size == 0)
+		return (NULL);
+	return (heap->data[0]);
+}
+
+void	init_mutex_coder(t_table *table)
+{
+	int	i;
+
+	i = 0;
+	while (i < table->nb_coders)
+	{
+		pthread_mutex_init(&table->coders[i].compile_count_lock, NULL);
+		pthread_mutex_init(&table->coders[i].last_compile_lock, NULL);
+		i++;
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:10 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/11 17:58:05 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 21:46:16 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 long	ft_atoi(const char *nptr)
 {
-	long(numbre), (positive);
+	long (numbre), (positive);
 	numbre = 0;
 	positive = 1;
 	while ((*nptr >= '\t' && *nptr <= '\r') || *nptr == ' ')
