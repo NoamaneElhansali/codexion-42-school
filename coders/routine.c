@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:07 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 02:19:35 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 19:50:46 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,49 +27,52 @@ void	compile_suit(t_coder *coder, long now)
 		release_dongles_edf(coder);
 }
 
-void	compile(t_coder *coder)
+int	compile(t_coder *coder)
 {
 	long	now;
 
 	if (coder->table->scheduler == FIFO)
 	{
 		if (!take_dongles_fifo(coder))
-			return ;
+			return 0;
 	}
 	else
 	{
 		if (!take_dongles_edf(coder))
-			return ;
+			return 0;
 	}
 	if (get_stop(coder->table))
 	{
 		give_dongles(coder);
-		return ;
+		return 0;
 	}
 	now = gettimenow();
 	compile_suit(coder, now);
+	return 1;
 }
 
-void	debugging(t_coder *coder)
+int	debugging(t_coder *coder)
 {
 	if (get_stop(coder->table))
-		return ;
+		return (0);
 	pthread_mutex_lock(&coder->table->print_lock);
 	printf("\033[33m%ld %d is debugging\033[0m\n", gettimenow()
 		- coder->table->start_time, coder->id);
 	pthread_mutex_unlock(&coder->table->print_lock);
 	smart_sleep(coder->table->time_to_debug, coder->table);
+	return (1);
 }
 
-void	refactoring(t_coder *coder)
+int	refactoring(t_coder *coder)
 {
 	if (get_stop(coder->table))
-		return ;
+		return 0;
 	pthread_mutex_lock(&coder->table->print_lock);
 	printf("\033[33m%ld %d is refactoring\033[0m\n", gettimenow()
 		- coder->table->start_time, coder->id);
 	pthread_mutex_unlock(&coder->table->print_lock);
 	smart_sleep(coder->table->time_to_refactor, coder->table);
+	return 1;
 }
 
 void	*coder_routine(void *arg)
@@ -79,16 +82,12 @@ void	*coder_routine(void *arg)
 	coder = (t_coder *)arg;
 	while (!get_stop(coder->table))
 	{
-		// smart_sleep(coder->table->dongle_cooldown, coder->table);
-		if (get_stop(coder->table) || is_complet_compile(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder) || !compile(coder))
 			break ;
-		compile(coder);
-		if (get_stop(coder->table) || is_complet_compile(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder) || !debugging(coder))
 			break ;
-		debugging(coder);
-		if (get_stop(coder->table) || is_complet_compile(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder) || !refactoring(coder))
 			break ;
-		refactoring(coder);
 	}
 	return (NULL);
 }
