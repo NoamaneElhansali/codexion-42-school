@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:01 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 19:04:35 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 22:06:53 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ int	check_must_complie(t_table *table)
 	pthread_mutex_lock(&table->complite_sim_lock);
 	all_done = (table->complite_sim == table->nb_coders);
 	pthread_mutex_unlock(&table->complite_sim_lock);
-
 	return (all_done);
 }
 
@@ -49,9 +48,8 @@ int	check_similation(t_table *table, long now, int i)
 		set_stop(table);
 		broadcast_coder(table);
 		pthread_mutex_lock(&table->print_lock);
-		printf("\033[31m%ld %d burned out\n", now - table->start_time,
+		printf("\033[31m%ld %d burned out\033[0m\n", now - table->start_time,
 			table->coders[i].id);
-
 		pthread_mutex_unlock(&table->print_lock);
 		return (1);
 	}

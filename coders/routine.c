@@ -34,21 +34,21 @@ int	compile(t_coder *coder)
 	if (coder->table->scheduler == FIFO)
 	{
 		if (!take_dongles_fifo(coder))
-			return 0;
+			return (0);
 	}
 	else
 	{
 		if (!take_dongles_edf(coder))
-			return 0;
+			return (0);
 	}
 	if (get_stop(coder->table))
 	{
 		give_dongles(coder);
-		return 0;
+		return (0);
 	}
 	now = gettimenow();
 	compile_suit(coder, now);
-	return 1;
+	return (1);
 }
 
 int	debugging(t_coder *coder)
@@ -66,13 +66,13 @@ int	debugging(t_coder *coder)
 int	refactoring(t_coder *coder)
 {
 	if (get_stop(coder->table))
-		return 0;
+		return (0);
 	pthread_mutex_lock(&coder->table->print_lock);
 	printf("\033[33m%ld %d is refactoring\033[0m\n", gettimenow()
 		- coder->table->start_time, coder->id);
 	pthread_mutex_unlock(&coder->table->print_lock);
 	smart_sleep(coder->table->time_to_refactor, coder->table);
-	return 1;
+	return (1);
 }
 
 void	*coder_routine(void *arg)
@@ -82,11 +82,14 @@ void	*coder_routine(void *arg)
 	coder = (t_coder *)arg;
 	while (!get_stop(coder->table))
 	{
-		if (get_stop(coder->table) || is_complet_compile(coder) || !compile(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder)
+			|| !compile(coder))
 			break ;
-		if (get_stop(coder->table) || is_complet_compile(coder) || !debugging(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder)
+			|| !debugging(coder))
 			break ;
-		if (get_stop(coder->table) || is_complet_compile(coder) || !refactoring(coder))
+		if (get_stop(coder->table) || is_complet_compile(coder)
+			|| !refactoring(coder))
 			break ;
 	}
 	return (NULL);

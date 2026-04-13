@@ -47,9 +47,9 @@ int	check_parameter(int *p)
 	return (1);
 }
 
-int free_allocate(t_table *t)
+int	free_allocate(t_table *t)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < t->nb_coders)
