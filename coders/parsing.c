@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:04 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/11 17:53:49 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/12 14:27:26 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ int	*parser(char **av, int ac)
 
 	i = 1;
 	param = malloc(sizeof(int) * 7);
+	if (!param)
+		return (NULL);
 	while (i < ac - 1)
 	{
 		param[i - 1] = ft_atoi(av[i]);

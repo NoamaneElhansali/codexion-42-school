@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:45 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 02:28:23 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 16:13:28 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,26 +19,20 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-typedef struct s_dongle
-{
-	pthread_mutex_t mutex;
-	long last_used;
-	pthread_mutex_t last_used_lock;
-} t_dongle;
 
 typedef struct s_coder
 {
 	int				id;
 	pthread_t		thread;
-
+	
 	long			last_compile;
 	int				compile_count;
 	pthread_mutex_t	last_compile_lock;
 	pthread_mutex_t	compile_count_lock;
-
-	t_dongle	*left;
-	t_dongle	*right;
-
+	
+	struct s_dongle	*left;
+	struct s_dongle	*right;
+	
 	struct s_table	*table;
 }					t_coder;
 
@@ -62,6 +56,17 @@ typedef struct s_heap
 	int				size;
 }					t_heap;
 
+typedef struct s_dongle
+{
+	pthread_mutex_t mutex;
+	long last_used;
+	pthread_mutex_t last_used_lock;
+	t_queue			queue;
+	t_heap			heap;
+	pthread_mutex_t	queue_lock;
+	pthread_cond_t	cond;
+} t_dongle;
+
 typedef struct s_table
 {
 	int				nb_coders;
@@ -76,13 +81,9 @@ typedef struct s_table
 	t_dongle	*dongles;
 	pthread_mutex_t	print_lock;
 	pthread_mutex_t	stop_lock;
-	pthread_mutex_t	queue_lock;
 	pthread_mutex_t	complite_sim_lock;
-	pthread_cond_t	cond;
 	t_scheduler		scheduler;
 	pthread_t		thread_monitor;
-	t_queue			queue;
-	t_heap			heap;
 	int				complite_sim;
 	t_coder			*coders;
 
@@ -93,10 +94,10 @@ long				ft_atoi(const char *nptr);
 int					ft_strcmp_adv(const char *s1, const char *s2);
 void				compile(t_coder *coder);
 void				*coder_routine(void *arg);
-void				init_coder(t_coder *coder, t_table *table, int id);
-void				init_coders(t_table *table);
+int					init_coder(t_coder *coder, t_table *table, int id);
+int					init_coders(t_table *table);
 int					*parser(char **av, int ac);
-void				init_mutex(t_table *table);
+int				init_mutex(t_table *table);
 t_table				*init_parameter(int *paramter, char *scheduler);
 long				gettimenow(void);
 int					get_stop(t_table *table);
@@ -132,5 +133,7 @@ int					is_complet_compile(t_coder *coder);
 void				broadcast_coder(t_table *table);
 int					check_similation(t_table *table, long now, int i);
 int					lock_dongles(t_dongle *d, t_coder *coder);
+void wait_heap(t_dongle *d, t_coder *coder);
+void wait_queue(t_dongle *d, t_coder *coder);
 
 #endif
