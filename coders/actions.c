@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:38 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 01:04:11 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 16:27:18 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,37 @@ void set_last_use(t_dongle *d, long now)
 	pthread_mutex_unlock(&d->last_used_lock);
 }
 
+void remove_in_queue(t_dongle *d)
+{
+	pthread_mutex_lock(&d->queue_lock);
+	pop(&d->queue);
+	pthread_cond_broadcast(&d->cond);
+	pthread_mutex_unlock(&d->queue_lock);
+}
+
+void remove_in_heap(t_dongle *d)
+{
+	pthread_mutex_lock(&d->queue_lock);
+	remove_min(&d->heap);
+	pthread_cond_broadcast(&d->cond);
+	pthread_mutex_unlock(&d->queue_lock);
+}
+
 void	give_dongles(t_coder *coder)
 {
 	long	now;
 
 	now = gettimenow();
+	
+	if (coder->table->scheduler == FIFO)
+	{
+		remove_in_queue(coder->left);
+		remove_in_queue(coder->right);
+	}else
+	{
+		remove_in_heap(coder->left);
+		remove_in_heap(coder->right);
+	}
 	pthread_mutex_unlock(&coder->left->mutex);
 	pthread_mutex_unlock(&coder->right->mutex);
 	set_last_use(coder->left, now);
@@ -64,9 +90,17 @@ int	coder_is_burned(t_coder *coder)
 
 void	broadcast_coder(t_table *table)
 {
-	pthread_mutex_lock(&table->queue_lock);
-	pthread_cond_broadcast(&table->cond);
-	pthread_mutex_unlock(&table->queue_lock);
+	int i;
+
+	i = 0;
+	while (i < table->nb_coders)
+	{	
+		pthread_mutex_lock(&table->dongles[i].queue_lock);
+		pthread_cond_broadcast(&table->dongles[i].cond);
+		pthread_mutex_unlock(&table->dongles[i].queue_lock);
+		i++;
+	}
+	
 }
 
 void	wait_cooldown(t_dongle *d, t_table *t)
@@ -90,6 +124,10 @@ void	wait_cooldown(t_dongle *d, t_table *t)
 
 int	lock_dongles(t_dongle *d, t_coder *coder)
 {
+	if (coder->table->scheduler == FIFO)
+		wait_queue(d,coder);
+	else
+		wait_heap(d,coder);
 	wait_cooldown(d, coder->table);
 	pthread_mutex_lock(&d->mutex);
 	if (get_stop(coder->table))

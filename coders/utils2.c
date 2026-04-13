@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:49:27 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 02:33:44 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 07:03:50 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,6 @@ void	release_dongles_edf(t_coder *coder)
 
 	table = coder->table;
 	give_dongles(coder);
-	pthread_mutex_lock(&table->queue_lock);
-	remove_min(&table->heap);
-	pthread_cond_broadcast(&table->cond);
-	pthread_mutex_unlock(&table->queue_lock);
 }
 
 int	is_in_first_edf(t_heap *h, int id, int n)

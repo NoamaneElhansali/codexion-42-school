@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:58 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 03:13:50 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 16:13:43 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@ void	destroy_mutex_cond(t_table *table)
 	i = 0;
 	pthread_mutex_destroy(&table->print_lock);
 	pthread_mutex_destroy(&table->stop_lock);
-	pthread_mutex_destroy(&table->queue_lock);
-	pthread_cond_destroy(&table->cond);
 	while (i < table->nb_coders)
 	{
 		pthread_mutex_destroy(&table->dongles[i].mutex);
+		pthread_mutex_destroy(&table->dongles[i].queue_lock);
+		pthread_cond_destroy(&table->dongles[i].cond);
 		pthread_mutex_destroy(&table->coders[i].compile_count_lock);
 		pthread_mutex_destroy(&table->coders[i].last_compile_lock);
 		i++;
@@ -37,10 +37,28 @@ void	destroy_mutex_cond(t_table *table)
 
 int	check_parameter(int *p)
 {
+	if (!p)
+		return (0);
 	if (p[0] == 0 || p[1] == 0 || p[5] == 0)
 	{
 		free(p);
 		return (0);
+	}
+	return (1);
+}
+
+int free_allocate(t_table *t)
+{
+	int i;
+
+	i = 0;
+	while (i < t->nb_coders)
+	{
+		if (t->scheduler == FIFO)
+			free(t->dongles[i].queue.data);
+		else
+			free(t->dongles[i].heap.data);
+		i++;
 	}
 	return (1);
 }
@@ -60,8 +78,7 @@ int	main(int argc, char *argv[])
 	destroy_mutex_cond(table);
 	free(param);
 	free(table->coders);
-	free(table->queue.data);
-	free(table->heap.data);
+	free_allocate(table);
 	free(table->dongles);
 	free(table);
 	return (0);
