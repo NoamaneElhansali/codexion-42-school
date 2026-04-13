@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:01 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 02:26:49 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 19:04:35 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,14 @@ int	check_must_complie(t_table *table)
 
 int	check_similation(t_table *table, long now, int i)
 {
-	if (get_last_compile(&table->coders[i]) + table->time_to_burnout < now)
+	if (get_last_compile(&table->coders[i]) + table->time_to_burnout <= now)
 	{
 		set_stop(table);
 		broadcast_coder(table);
 		pthread_mutex_lock(&table->print_lock);
 		printf("\033[31m%ld %d burned out\n", now - table->start_time,
 			table->coders[i].id);
+
 		pthread_mutex_unlock(&table->print_lock);
 		return (1);
 	}
@@ -80,7 +81,7 @@ void	*monitor(void *arg)
 				return (NULL);
 			i++;
 		}
-		usleep(1000);
+		usleep(100);
 	}
 	return (NULL);
 }

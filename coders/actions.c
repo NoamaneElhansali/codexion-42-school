@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:38 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 16:27:18 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 18:59:36 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	take_dongles(t_coder *coder)
 	}
 	if (!lock_dongles(first, coder))
 		return (0);
-    if (!lock_dongles(second, coder))
+    if (first == second || !lock_dongles(second, coder))
     {
         pthread_mutex_unlock(&first->mutex); 
         return (0);

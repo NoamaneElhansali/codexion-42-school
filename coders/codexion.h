@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:45 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 16:13:28 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 19:51:14 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ typedef struct s_table
 int					parser_parameter(char **av, int ac);
 long				ft_atoi(const char *nptr);
 int					ft_strcmp_adv(const char *s1, const char *s2);
-void				compile(t_coder *coder);
+int				compile(t_coder *coder);
 void				*coder_routine(void *arg);
 int					init_coder(t_coder *coder, t_table *table, int id);
 int					init_coders(t_table *table);
@@ -104,8 +104,8 @@ int					get_stop(t_table *table);
 void				set_stop(t_table *table);
 void				start_monitoring(t_table *table);
 void				*monitor(void *arg);
-void				debugging(t_coder *coder);
-void				refactoring(t_coder *coder);
+int				debugging(t_coder *coder);
+int				refactoring(t_coder *coder);
 int					take_dongles(t_coder *coder);
 void				give_dongles(t_coder *coder);
 void				join_coders(t_table *table);
