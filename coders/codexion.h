@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:45 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 20:28:22 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/13 22:19:05 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,6 @@ void				give_dongles(t_coder *coder);
 void				join_coders(t_table *table);
 void				push(t_queue *q, int id);
 int					pop(t_queue *q);
-void				init_queue(t_queue *q);
 int					take_dongles_fifo(t_coder *coder);
 void				release_dongles_fifo(t_coder *coder);
 long				get_deadline(t_coder *coder);
@@ -118,8 +117,6 @@ void				remove_min(t_heap *heap);
 t_coder				*get_min_heap(t_heap *heap);
 int					take_dongles_edf(t_coder *coder);
 void				release_dongles_edf(t_coder *coder);
-int					is_in_first_fifo(t_queue *q, int id, int n);
-int					is_in_first_edf(t_heap *h, int id, int n);
 void				smart_sleep(long time, t_table *t);
 void				init_mutex_coder(t_table *table);
 long				get_last_compile(t_coder *coder);
