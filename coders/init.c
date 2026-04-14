@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:54 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 20:35:38 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/14 13:49:29 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,14 @@ int	init_dongle(t_dongle *dongle, t_table *t)
 	if (t->scheduler == FIFO)
 	{
 		dongle->queue.data = malloc(sizeof(int) * 2);
+		if (!dongle->queue.data)
+			return (pthread_mutex_unlock(&dongle->mutex), (0));
 	}
 	else
 	{
 		dongle->heap.data = malloc(sizeof(t_coder *) * 2);
+		if (!dongle->heap.data)
+			return (pthread_mutex_unlock(&dongle->mutex), 0);
 	}
 	dongle->queue.f = 0;
 	dongle->queue.r = 0;
@@ -87,6 +91,8 @@ t_table	*init_parameter(int *paramter, char *scheduler)
 	if (ft_strcmp_adv(scheduler, "edf"))
 		sch = EDF;
 	table = malloc(sizeof(t_table));
+	if (!table)
+		return (print_message_err("[ERROR MEMORY]", table), NULL);
 	table->nb_coders = paramter[0];
 	table->time_to_burnout = paramter[1];
 	table->time_to_compile = paramter[2];
@@ -100,9 +106,5 @@ t_table	*init_parameter(int *paramter, char *scheduler)
 	table->dongles = malloc(sizeof(t_dongle) * table->nb_coders);
 	table->coders = malloc(sizeof(t_coder) * table->nb_coders);
 	table->start_time = gettimenow();
-	init_mutex(table);
-	init_mutex_coder(table);
-	init_dongles(table);
-	init_coders(table);
-	return (table);
+	return (check_init(table));
 }

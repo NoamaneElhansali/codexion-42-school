@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:58 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 16:13:43 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/14 12:37:48 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ int	main(int argc, char *argv[])
 	if (!check_parameter(param))
 		return (write(2, "[INVALID ARG]\n", 14));
 	table = init_parameter(param, argv[8]);
+	if (!table)
+		return (1);
 	start_monitoring(table);
 	destroy_mutex_cond(table);
 	free(param);

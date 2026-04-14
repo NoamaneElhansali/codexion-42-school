@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:26:04 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/12 14:27:26 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/14 13:41:29 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,12 @@ int	*parser(char **av, int ac)
 		i++;
 	}
 	return (param);
+}
+
+void	print_message_err(char *msg, t_table *t)
+{
+	set_stop(t);
+	pthread_mutex_lock(&t->print_lock);
+	printf("-------\n%s\n--------\n", msg);
+	pthread_mutex_unlock(&t->print_lock);
 }

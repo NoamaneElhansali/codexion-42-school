@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:45 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/13 22:19:05 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/14 13:48:21 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ t_coder				*get_min_heap(t_heap *heap);
 int					take_dongles_edf(t_coder *coder);
 void				release_dongles_edf(t_coder *coder);
 void				smart_sleep(long time, t_table *t);
-void				init_mutex_coder(t_table *table);
+int					init_mutex_coder(t_table *table);
 long				get_last_compile(t_coder *coder);
 void				set_last_compile(t_coder *coder, long time);
 int					get_compile_count(t_coder *coder);
@@ -129,5 +129,8 @@ int					check_similation(t_table *table, long now, int i);
 int					lock_dongles(t_dongle *d, t_coder *coder);
 void				wait_heap(t_dongle *d, t_coder *coder);
 void				wait_queue(t_dongle *d, t_coder *coder);
+void				print_message_err(char *msg, t_table *t);
+t_table				*check_init(t_table *table);
+int					init_dongles(t_table *table);
 
 #endif
