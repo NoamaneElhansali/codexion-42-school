@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:49:27 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/14 02:22:04 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/18 15:04:46 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 
 void	release_dongles_edf(t_coder *coder)
 {
-	t_table	*table;
-
-	table = coder->table;
 	give_dongles(coder);
 }
 

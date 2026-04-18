@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:54 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/14 13:49:29 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/18 21:16:49 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,8 @@ t_table	*init_parameter(int *paramter, char *scheduler)
 		sch = EDF;
 	table = malloc(sizeof(t_table));
 	if (!table)
-		return (print_message_err("[ERROR MEMORY]", table), NULL);
+		return (print_message_err("[ERROR MEMORY]", NULL), free(paramter),
+			NULL);
 	table->nb_coders = paramter[0];
 	table->time_to_burnout = paramter[1];
 	table->time_to_compile = paramter[2];
@@ -103,8 +104,6 @@ t_table	*init_parameter(int *paramter, char *scheduler)
 	table->scheduler = sch;
 	table->stop = 0;
 	table->complite_sim = 0;
-	table->dongles = malloc(sizeof(t_dongle) * table->nb_coders);
-	table->coders = malloc(sizeof(t_coder) * table->nb_coders);
 	table->start_time = gettimenow();
-	return (check_init(table));
+	return (check_init(table, paramter));
 }
