@@ -6,7 +6,7 @@
 /*   By: nelhansa <nelhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/11 12:25:45 by nelhansa          #+#    #+#             */
-/*   Updated: 2026/04/14 13:48:21 by nelhansa         ###   ########.fr       */
+/*   Updated: 2026/04/18 17:54:37 by nelhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ int					lock_dongles(t_dongle *d, t_coder *coder);
 void				wait_heap(t_dongle *d, t_coder *coder);
 void				wait_queue(t_dongle *d, t_coder *coder);
 void				print_message_err(char *msg, t_table *t);
-t_table				*check_init(t_table *table);
+t_table				*check_init(t_table *table, int *parameter);
 int					init_dongles(t_table *table);
 
 #endif
